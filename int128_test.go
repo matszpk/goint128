@@ -202,6 +202,33 @@ func TestUInt128SubB(t *testing.T) {
     }
 }
 
+type UInt128CmpTC struct {
+    a, b UInt128
+    expected int
+}
+
+func TestUInt128Cmp(t *testing.T) {
+    testCases := []UInt128CmpTC {
+        UInt128CmpTC{ UInt128{ 3421, 2454 }, UInt128{ 831, 78731 }, -1 },
+        UInt128CmpTC{ UInt128{ 6743, 6841 }, UInt128{ 7731121, 1212 }, 1 },
+        UInt128CmpTC{ UInt128{ 1821, 33411 }, UInt128{ 589759892, 33411 }, -1 },
+        UInt128CmpTC{ UInt128{ 5788219381, 33411 }, UInt128{ 954891, 33411 }, 1 },
+        UInt128CmpTC{ UInt128{ 1231, 33411 }, UInt128{ 1231, 33411 }, 0 },
+    }
+    for i, tc := range testCases {
+        a, b := tc.a, tc.b
+        result := tc.a.Cmp(tc.b)
+        if tc.expected!=result {
+            t.Errorf("Result mismatch: %d: cmp(%v,%v)->%v!=%v",
+                     i, tc.a, tc.b, tc.expected, result)
+        }
+        if tc.a!=a || tc.b!=b {
+            t.Errorf("Argument has been modified: %d: %v,%v!=%v,%v",
+                     i, a, b, tc.a, tc.b)
+        }
+    }
+}
+
 func TestUInt128Mul(t *testing.T) {
     testCases := []UInt128TC {
         UInt128TC { UInt128{ 0xc9baa109a40baa11, 0x384b9a928941ac3 },

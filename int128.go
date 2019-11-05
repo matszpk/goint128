@@ -79,6 +79,23 @@ func (a UInt128) Sub64(b uint64) UInt128 {
     return c
 }
 
+// return 0 - if equal, -1 if a less than b, 1 if a greater than b
+func (a UInt128) Cmp(b UInt128) int {
+    if a[1]==b[1] {
+        if a[0]==b[0] {
+            return 0
+        } else if a[0]>b[0] {
+            return 1
+        } else {
+            return -1
+        }
+    } else if a[1]>b[1] {
+        return 1
+    } else { // a[1]<b[1]
+        return -1
+    }
+}
+
 func (a UInt128) Mul(b UInt128) UInt128 {
     var c UInt128
     c[1], c[0] = Mul64(a[0], b[0])
