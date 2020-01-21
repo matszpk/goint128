@@ -792,7 +792,6 @@ type SampleStruct struct {
     A, B UInt128
 }
 
-
 func TestUInt128JSONHandling(t *testing.T) {
     const sampleText = `{ "A": 134554, "B": "234499215868989382112354567" }`
     var out SampleStruct
