@@ -24,3 +24,6 @@ Available functions:
 * UInt128DivFull - divide 256-bit unsigned integer by 128-bit value, return 128-bit quotient and remainder
 * UInt128.Format - format integer to decimal string
 * ParseUInt128 - parse integer from string, return value and error (will be nil if no error)
+* UInt128.ToFloat64 - convert to float64
+* Float64ToUInt128 - convert float64 to UInt128
+* marshallers and unmarshares for binary, text and JSON format
