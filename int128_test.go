@@ -583,3 +583,67 @@ func TestUInt128Parse(t *testing.T) {
         }
     }
 }
+
+type UInt128ToFloat64TC struct {
+    value UInt128
+    expected float64
+}
+
+func TestUInt128ToFloat64(t *testing.T) {
+    testCases := []UInt128ToFloat64TC{
+        UInt128ToFloat64TC{ UInt128{ 0, 0 }, 0.0 },
+        UInt128ToFloat64TC{ UInt128{ 1, 0 }, 1.0 },
+        UInt128ToFloat64TC{ UInt128{ 54930201, 0 }, 54930201.0 },
+        UInt128ToFloat64TC{ UInt128{ 85959028918918968, 0 }, 85959028918918968.0 },
+        UInt128ToFloat64TC{ UInt128{ 16346246572275455745, 10277688839402 },
+                    189589895689685989335661129029377.0 },
+        UInt128ToFloat64TC{ UInt128{ 0xffffffffffffffff, 0xffffffffffffffff },
+                340282366920938463463374607431768211455.0 },
+    }
+    for i, tc := range testCases {
+        result := tc.value.ToFloat64()
+        if tc.expected!=result {
+            t.Errorf("Result mismatch: %d: tofloat64(%v)->%v!=%v",
+                     i, tc.value, tc.expected, result)
+        }
+    }
+}
+
+type Float64ToUInt128TC struct {
+    value float64
+    expected UInt128
+    expError error
+}
+
+func TestFloat64ToUInt128(t *testing.T) {
+    testCases := []Float64ToUInt128TC{
+        Float64ToUInt128TC{ 0.0, UInt128{ 0, 0 }, nil },
+        Float64ToUInt128TC{ 1.0, UInt128{ 1, 0 }, nil },
+        Float64ToUInt128TC{ 1.7, UInt128{ 1, 0 }, nil },
+        Float64ToUInt128TC{ 145645677.18, UInt128{ 145645677, 0 }, nil },
+        Float64ToUInt128TC{ 3145645677.778, UInt128{ 3145645677, 0 }, nil },
+        Float64ToUInt128TC{ 187923786919586921.0,
+            UInt128{ 187923786919586912, 0 }, nil },
+        Float64ToUInt128TC{ 11792378691958692154.0,
+            UInt128{ 11792378691958691840, 0 }, nil },
+        Float64ToUInt128TC{ 26858969188828978177.0,
+            UInt128{ 8412225115119427584, 1 }, nil },
+        Float64ToUInt128TC{ 75901828515489894894398.0,
+            UInt128{ 11923396248800854016, 4114 }, nil },
+        Float64ToUInt128TC{ 93895689491189486962895905237.0,
+            UInt128{ 12333477015461036032, 5090095526 }, nil },
+        Float64ToUInt128TC{ 8892238191913586823938589549295667.0,
+            UInt128{ 4611686018427387904, 482049198296564 }, nil },
+        Float64ToUInt128TC{ 2938968690290190390494904909429029029.0,
+            UInt128{ 0, 159321811943975104 }, nil },  // ?
+        Float64ToUInt128TC{ 219849568662195967795923292939493492190.0,
+            UInt128{ 0, 11918068998177697792 }, nil },  // ?
+    }
+    for i, tc := range testCases {
+        result, err := Float64ToUInt128(tc.value)
+        if tc.expected!=result || tc.expError!=err {
+            t.Errorf("Result mismatch: %d: touint128(%v)->%v,%v!=%v,%v",
+                     i, tc.value, tc.expected, tc.expError, result, err)
+        }
+    }
+}

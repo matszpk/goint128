@@ -22,6 +22,7 @@
 package goint128
 
 import (
+    "math"
     "math/bits"
     "sort"
     "strconv"
@@ -380,4 +381,21 @@ func ParseUInt128(str string) (UInt128, error) {
         return UInt128{}, strconv.ErrSyntax
     }
     return out, nil
+}
+
+func (a UInt128) ToFloat64() float64 {
+    return float64(a[0]) + float64(a[1])*float64(18446744073709551616.0)
+}
+
+func Float64ToUInt128(a float64) (UInt128, error) {
+    if a >= 340282366920938463463374607431768211456.0 || a < 0.0 {
+        return UInt128{}, strconv.ErrRange
+    }
+    am, ae := math.Frexp(a)
+    if ae<0 { return UInt128{0,0}, nil }
+    if ae<=64 { return UInt128{ uint64(a), 0 }, nil }
+    ami := uint64(am * 18446744073709551616.0)
+    ae -= 64
+    if ae==64 { return UInt128{ 0, ami }, nil }
+    return UInt128{ ami<<uint(ae), ami>>uint(64-ae) }, nil
 }
