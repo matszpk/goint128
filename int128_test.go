@@ -23,6 +23,7 @@ package goint128
 
 import (
     "bytes"
+    "encoding/json"
     "fmt"
     "math"
     "strconv"
@@ -784,5 +785,28 @@ func TestUInt128UnmarshalJSON(t *testing.T) {
             t.Errorf("Result mismatch: %d: unmarshaljson(%v)->%v,%v!=%v,%v",
                      i, tc.data, tc.expected, tc.expError, v, err)
         }
+    }
+}
+
+type SampleStruct struct {
+    A, B UInt128
+}
+
+
+func TestUInt128JSONHandling(t *testing.T) {
+    const sampleText = `{ "A": 134554, "B": "234499215868989382112354567" }`
+    var out SampleStruct
+    var err error
+    if err = json.Unmarshal([]byte(sampleText), &out); err!=nil {
+        t.Errorf("Unmarshal returns error: %v", err)
+    }
+    expected := SampleStruct{ UInt128{134554, 0}, UInt128{17793088829901545735, 12712227} }
+    if out!=expected {
+        t.Errorf("Result mismatch: %v", out)
+    }
+    var b []byte
+    b, err = json.Marshal(out)
+    if string(b)!=`{"A":134554,"B":"234499215868989382112354567"}` {
+        t.Errorf("Result mismatch: %v", string(b))
     }
 }

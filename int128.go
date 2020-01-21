@@ -406,7 +406,7 @@ func Float64ToUInt128(a float64) (UInt128, error) {
 
 // marshalling/unmarshaling
 
-func (a *UInt128) MarshalBinary() (data []byte, err error) {
+func (a UInt128) MarshalBinary() (data []byte, err error) {
     data2 := make([]byte, 16)
     binary.LittleEndian.PutUint64(data2[0:8], a[0])
     binary.LittleEndian.PutUint64(data2[8:16], a[1])
@@ -422,7 +422,7 @@ func (a *UInt128) UnmarshalBinary(data []byte) error {
     return nil
 }
 
-func (a *UInt128) MarshalText() (text []byte, err error) {
+func (a UInt128) MarshalText() (text []byte, err error) {
     return []byte(a.Format()), nil
 }
 
@@ -433,7 +433,7 @@ func (a *UInt128) UnmarshalText(text []byte) error {
 }
 
 
-func (a *UInt128) MarshalJSON() ([]byte, error) {
+func (a UInt128) MarshalJSON() ([]byte, error) {
     if a[1]==0 {
         return []byte(a.Format()), nil
     }
