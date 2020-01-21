@@ -388,7 +388,7 @@ func (a UInt128) ToFloat64() float64 {
 }
 
 func Float64ToUInt128(a float64) (UInt128, error) {
-    if a >= 340282366920938463463374607431768211456.0 || a < 0.0 {
+    if math.IsNaN(a) || a >= 340282366920938463463374607431768211456.0 || a < 0.0 {
         return UInt128{}, strconv.ErrRange
     }
     am, ae := math.Frexp(a)

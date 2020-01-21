@@ -23,6 +23,7 @@ package goint128
 
 import (
     "fmt"
+    "math"
     "strconv"
     "testing"
 )
@@ -638,6 +639,11 @@ func TestFloat64ToUInt128(t *testing.T) {
             UInt128{ 0, 159321811943975104 }, nil },  // ?
         Float64ToUInt128TC{ 219849568662195967795923292939493492190.0,
             UInt128{ 0, 11918068998177697792 }, nil },  // ?
+        Float64ToUInt128TC{ 340282366920938463463374607431768211456.0,
+            UInt128{}, strconv.ErrRange },
+        Float64ToUInt128TC{ -0.5, UInt128{}, strconv.ErrRange },
+        Float64ToUInt128TC{ math.Inf(1), UInt128{}, strconv.ErrRange },
+        Float64ToUInt128TC{ math.NaN(), UInt128{}, strconv.ErrRange },
     }
     for i, tc := range testCases {
         result, err := Float64ToUInt128(tc.value)
