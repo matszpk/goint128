@@ -22,6 +22,7 @@
 package goint128
 
 import (
+    "bytes"
     "fmt"
     "math"
     "strconv"
@@ -650,6 +651,138 @@ func TestFloat64ToUInt128(t *testing.T) {
         if tc.expected!=result || tc.expError!=err {
             t.Errorf("Result mismatch: %d: touint128(%v)->%v,%v!=%v,%v",
                      i, tc.value, tc.expected, tc.expError, result, err)
+        }
+    }
+}
+
+type UInt128MarshalBinTC struct {
+    value UInt128
+    expected []byte
+}
+
+func TestUInt128MarshalBinary(t *testing.T) {
+    testCases := []UInt128MarshalBinTC{
+        UInt128MarshalBinTC{ UInt128{ 0xccaa010203040506, 0xbbaca34c0a04521 },
+                []byte{ 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0xaa, 0xcc,
+                    0x21, 0x45, 0xa0, 0xc0, 0x34, 0xca, 0xba, 0xb } },
+    }
+    for i, tc := range testCases {
+        result, err := tc.value.MarshalBinary()
+        if err!=nil {
+            t.Errorf("MarshalBinary returns error: %v", err)
+        }
+        if !bytes.Equal(tc.expected, result) {
+            t.Errorf("Result mismatch: %d: marshalbin(%v)->%v!=%v",
+                     i, tc.value, tc.expected, result)
+        }
+    }
+}
+
+type UInt128UnmarshalBinTC struct {
+    data []byte
+    expected UInt128
+    expError error
+}
+
+func TestUInt128UnmarshalBinary(t *testing.T) {
+    testCases := []UInt128UnmarshalBinTC{
+        UInt128UnmarshalBinTC{ 
+            []byte{ 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0xaa, 0xcc,
+                    0x21, 0x45, 0xa0, 0xc0, 0x34, 0xca, 0xba, 0xb },
+            UInt128{ 0xccaa010203040506, 0xbbaca34c0a04521 }, nil },
+        UInt128UnmarshalBinTC{ 
+            []byte{ 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0xaa, 0xcc,
+                    0x21, 0x45, 0xa0, 0xc0, 0x34, 0xca, 0xba },
+            UInt128{}, ErrDataTooSmall },
+    }
+    for i, tc := range testCases {
+        var v UInt128
+        err := v.UnmarshalBinary(tc.data)
+        if tc.expected!=v || tc.expError!=err {
+            t.Errorf("Result mismatch: %d: unmarshalbin(%v)->%v,%v!=%v,%v",
+                     i, tc.data, tc.expected, tc.expError, v, err)
+        }
+    }
+}
+
+func TestUInt128MarshalText(t *testing.T) {
+    testCases := []UInt128MarshalBinTC{
+        UInt128MarshalBinTC{ UInt128{ 34954975929367788, 0 },
+                []byte("34954975929367788") },
+        UInt128MarshalBinTC{ UInt128{ 1492718235287466483, 42196924 },
+                []byte("778395859218490582901895667") },
+    }
+    for i, tc := range testCases {
+        result, err := tc.value.MarshalText()
+        if err!=nil {
+            t.Errorf("MarshalText returns error: %v", err)
+        }
+        if !bytes.Equal(tc.expected, result) {
+            t.Errorf("Result mismatch: %d: marshaltext(%v)->%v!=%v",
+                     i, tc.value, tc.expected, result)
+        }
+    }
+}
+
+func TestUInt128UnmarshalText(t *testing.T) {
+    testCases := []UInt128UnmarshalBinTC{
+        UInt128UnmarshalBinTC{ []byte("34954975929367788"),
+                UInt128{ 34954975929367788, 0 }, nil },
+        UInt128UnmarshalBinTC{ []byte("778395859218490582901895667"),
+                UInt128{ 1492718235287466483, 42196924 }, nil },
+        UInt128UnmarshalBinTC{ []byte("778395859218490582901895667xxx"),
+                UInt128{}, strconv.ErrSyntax },
+    }
+    for i, tc := range testCases {
+        var v UInt128
+        err := v.UnmarshalText(tc.data)
+        if tc.expected!=v || tc.expError!=err {
+            t.Errorf("Result mismatch: %d: unmarshaltext(%v)->%v,%v!=%v,%v",
+                     i, tc.data, tc.expected, tc.expError, v, err)
+        }
+    }
+}
+
+func TestUInt128MarshalJSON(t *testing.T) {
+    testCases := []UInt128MarshalBinTC{
+        UInt128MarshalBinTC{ UInt128{ 34954975929367788, 0 },
+                []byte("34954975929367788") },
+        UInt128MarshalBinTC{ UInt128{ 1492718235287466483, 42196924 },
+                []byte("\"778395859218490582901895667\"") },
+    }
+    for i, tc := range testCases {
+        result, err := tc.value.MarshalJSON()
+        if err!=nil {
+            t.Errorf("MarshalJSON returns error: %v", err)
+        }
+        if !bytes.Equal(tc.expected, result) {
+            t.Errorf("Result mismatch: %d: marshaljson(%v)->%v!=%v",
+                     i, tc.value, tc.expected, result)
+        }
+    }
+}
+
+func TestUInt128UnmarshalJSON(t *testing.T) {
+    testCases := []UInt128UnmarshalBinTC{
+        UInt128UnmarshalBinTC{ []byte("34954975929367788"),
+                UInt128{ 34954975929367788, 0 }, nil },
+        UInt128UnmarshalBinTC{ []byte("\"34954975929367788\""),
+                UInt128{ 34954975929367788, 0 }, nil },
+        UInt128UnmarshalBinTC{ []byte("'34954975929367788'"),
+                UInt128{ 34954975929367788, 0 }, nil },
+        UInt128UnmarshalBinTC{ []byte("\"778395859218490582901895667\""),
+                UInt128{ 1492718235287466483, 42196924 }, nil },
+        UInt128UnmarshalBinTC{ []byte("'778395859218490582901895667'"),
+                UInt128{ 1492718235287466483, 42196924 }, nil },
+        UInt128UnmarshalBinTC{ []byte("778395859218490582901895667xxx"),
+                UInt128{}, strconv.ErrSyntax },
+    }
+    for i, tc := range testCases {
+        var v UInt128
+        err := v.UnmarshalJSON(tc.data)
+        if tc.expected!=v || tc.expError!=err {
+            t.Errorf("Result mismatch: %d: unmarshaljson(%v)->%v,%v!=%v,%v",
+                     i, tc.data, tc.expected, tc.expError, v, err)
         }
     }
 }

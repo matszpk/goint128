@@ -22,6 +22,9 @@
 package goint128
 
 import (
+    "bytes"
+    "encoding/binary"
+    "errors"
     "math"
     "math/bits"
     "sort"
@@ -391,11 +394,63 @@ func Float64ToUInt128(a float64) (UInt128, error) {
     if math.IsNaN(a) || a >= 340282366920938463463374607431768211456.0 || a < 0.0 {
         return UInt128{}, strconv.ErrRange
     }
-    am, ae := math.Frexp(a)
+    am, ae := math.Frexp(a) // get binary mantisa and exponent
     if ae<0 { return UInt128{0,0}, nil }
     if ae<=64 { return UInt128{ uint64(a), 0 }, nil }
     ami := uint64(am * 18446744073709551616.0)
     ae -= 64
+    // if last bit filled (shift is 64)
     if ae==64 { return UInt128{ 0, ami }, nil }
     return UInt128{ ami<<uint(ae), ami>>uint(64-ae) }, nil
+}
+
+// marshalling/unmarshaling
+
+func (a *UInt128) MarshalBinary() (data []byte, err error) {
+    data2 := make([]byte, 16)
+    binary.LittleEndian.PutUint64(data2[0:8], a[0])
+    binary.LittleEndian.PutUint64(data2[8:16], a[1])
+    return data2, nil
+}
+
+var ErrDataTooSmall error = errors.New("Data is too small")
+
+func (a *UInt128) UnmarshalBinary(data []byte) error {
+    if len(data) < 16 { return ErrDataTooSmall }
+    a[0] = binary.LittleEndian.Uint64(data[0:8])
+    a[1] = binary.LittleEndian.Uint64(data[8:16])
+    return nil
+}
+
+func (a *UInt128) MarshalText() (text []byte, err error) {
+    return []byte(a.Format()), nil
+}
+
+func (a *UInt128) UnmarshalText(text []byte) error {
+    var err error
+    *a, err = ParseUInt128(string(text))
+    return err
+}
+
+
+func (a *UInt128) MarshalJSON() ([]byte, error) {
+    if a[1]==0 {
+        return []byte(a.Format()), nil
+    }
+    var sb bytes.Buffer
+    sb.WriteRune('"')
+    sb.WriteString(a.Format())
+    sb.WriteRune('"')
+    return sb.Bytes(), nil
+}
+
+func (a *UInt128) UnmarshalJSON(data []byte) error {
+    dlen := len(data)
+    var err error
+    if (data[0]=='"'||data[0]=='\'') && (data[dlen-1]=='"'||data[dlen-1]=='\'') {
+        *a, err = ParseUInt128(string(data[1:dlen-1]))
+        return err
+    }
+    *a, err = ParseUInt128(string(data))
+    return err
 }
