@@ -447,7 +447,8 @@ func (a *UInt128) MarshalJSON() ([]byte, error) {
 func (a *UInt128) UnmarshalJSON(data []byte) error {
     dlen := len(data)
     var err error
-    if (data[0]=='"'||data[0]=='\'') && (data[dlen-1]=='"'||data[dlen-1]=='\'') {
+    if dlen>=2 && (data[0]=='"'||data[0]=='\'') &&
+                    (data[dlen-1]=='"'||data[dlen-1]=='\'') {
         *a, err = ParseUInt128(string(data[1:dlen-1]))
         return err
     }
