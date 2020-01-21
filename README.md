@@ -19,7 +19,7 @@ Available functions:
 * UInt128.Mul - multiply two integers and return low 128 bits of product
 * UInt128.MulFull - multiply two integers and return full product (first high, second low)
 * UInt128.Shl - shift left integer
-* UInt128.Shr - logival shift right integer
+* UInt128.Shr - logical shift right integer
 * UInt128.Div64 - divide 128-bit unsigned integer by 64-bit value, return 128-bit quotient and 64-bit remainder
 * UInt128DivFull - divide 256-bit unsigned integer by 128-bit value, return 128-bit quotient and remainder
 * UInt128.Format - format integer to decimal string
