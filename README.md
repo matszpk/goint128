@@ -17,6 +17,7 @@ Available functions:
 * UInt128.Sub64 - subtract 64-bit unsigned integer from 128-bit unsigned integer
 * UInt128.Cmp - compare integer, return -1 if less, 0 if equal or 1 if greater
 * UInt128.Mul - multiply two integers and return low 128 bits of product
+* UInt128.Mul64 - multiply by 64-bit unsigned integer and return low 128 bits of product
 * UInt128.MulFull - multiply two integers and return full product (first high, second low)
 * UInt128.Shl - shift left integer
 * UInt128.Shr - logical shift right integer
