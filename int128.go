@@ -107,6 +107,13 @@ func (a UInt128) Mul(b UInt128) UInt128 {
     return c
 }
 
+func (a UInt128) Mul64(b uint64) UInt128 {
+    var c UInt128
+    c[1], c[0] = Mul64(a[0], b)
+    c[1] += a[1]*b
+    return c
+}
+
 // return (high value, low value)
 func (a UInt128) MulFull(b UInt128) (UInt128, UInt128) {
     var clo, cm1, cm2, chi UInt128

@@ -255,6 +255,27 @@ func TestUInt128Mul(t *testing.T) {
     }
 }
 
+func TestUInt128Mul64(t *testing.T) {
+    testCases := []UInt128_64TC {
+        UInt128_64TC { UInt128{ 0xc9baa109a40baa11, 0x384b9a928941ac3 },
+            0x1839b9af9dc021, UInt128{ 0x6ac740f8d07aac31, 0x4e2dc743fec47ca9 } },
+        UInt128_64TC { UInt128{ 0x2327f0eac961980e, 0x49f0f9 },
+            0x11f82bb55bf, UInt128{ 0x77f8d53cd5871872, 0x530ae9c8b7cb9049 } },
+    }
+    for i, tc := range testCases {
+        a, b := tc.a, tc.b
+        result := tc.a.Mul64(tc.b)
+        if tc.expected!=result {
+            t.Errorf("Result mismatch: %d: %v*%v->%v!=%v",
+                     i, tc.a, tc.b, tc.expected, result)
+        }
+        if tc.a!=a || tc.b!=b {
+            t.Errorf("Argument has been modified: %d: %v,%v!=%v,%v",
+                     i, a, b, tc.a, tc.b)
+        }
+    }
+}
+
 type UInt128MulFTC struct {
     a, b UInt128
     expectedLo, expectedHi UInt128
