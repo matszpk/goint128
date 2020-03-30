@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+// Package to operate 128-bit integer
 package goint128
 
 import (
@@ -33,6 +34,7 @@ import (
 
 type UInt128 [2]uint64
 
+// add 128-bit unsigned integers
 func (a UInt128) Add(b UInt128) UInt128 {
     var c UInt128
     var carry uint64
@@ -41,7 +43,7 @@ func (a UInt128) Add(b UInt128) UInt128 {
     return c
 }
 
-// return sum and carry
+// add 128-bit unsigned integers with carry and return sum and output carry
 func (a UInt128) AddC(b UInt128, oldCarry uint64) (UInt128, uint64) {
     var c UInt128
     var carry uint64
@@ -50,6 +52,7 @@ func (a UInt128) AddC(b UInt128, oldCarry uint64) (UInt128, uint64) {
     return c, carry
 }
 
+// add 128-bit unsigned integer and 64-bit unsigned integer
 func (a UInt128) Add64(b uint64) UInt128 {
     var c UInt128
     var carry uint64
@@ -58,6 +61,7 @@ func (a UInt128) Add64(b uint64) UInt128 {
     return c
 }
 
+// subtract 128-bit unsigned integers
 func (a UInt128) Sub(b UInt128) UInt128 {
     var c UInt128
     var borrow uint64
@@ -66,7 +70,7 @@ func (a UInt128) Sub(b UInt128) UInt128 {
     return c
 }
 
-// return difference and borrow
+// subtract 128-bit unsigned integers with borrow and return difference and borrow
 func (a UInt128) SubB(b UInt128, oldBorrow uint64) (UInt128, uint64) {
     var c UInt128
     var borrow uint64
@@ -75,6 +79,7 @@ func (a UInt128) SubB(b UInt128, oldBorrow uint64) (UInt128, uint64) {
     return c, borrow
 }
 
+// subtract 64-bit unsigned from 128-bit unsigned integer
 func (a UInt128) Sub64(b uint64) UInt128 {
     var c UInt128
     var borrow uint64
@@ -83,7 +88,8 @@ func (a UInt128) Sub64(b uint64) UInt128 {
     return c
 }
 
-// return 0 - if equal, -1 if a less than b, 1 if a greater than b
+// compare 128-bit unsigned integer and return 0 if they equal,
+// 1 if first is greater than second, or -1 if first is lesser than second
 func (a UInt128) Cmp(b UInt128) int {
     if a[1]==b[1] {
         if a[0]==b[0] {
@@ -100,6 +106,7 @@ func (a UInt128) Cmp(b UInt128) int {
     }
 }
 
+// multiply 128-bit unsinged integers and return lower 128 bits value
 func (a UInt128) Mul(b UInt128) UInt128 {
     var c UInt128
     c[1], c[0] = Mul64(a[0], b[0])
@@ -107,6 +114,8 @@ func (a UInt128) Mul(b UInt128) UInt128 {
     return c
 }
 
+// multiply 128-bit unsigned integer and 64-bit unsigned integer and
+// return lower 128 bits product
 func (a UInt128) Mul64(b uint64) UInt128 {
     var c UInt128
     c[1], c[0] = Mul64(a[0], b)
@@ -114,7 +123,7 @@ func (a UInt128) Mul64(b uint64) UInt128 {
     return c
 }
 
-// return (high value, low value)
+// multiply 128-bit unsigned integers and return high and lower product
 func (a UInt128) MulFull(b UInt128) (UInt128, UInt128) {
     var clo, cm1, cm2, chi UInt128
     clo[1], clo[0] = Mul64(a[0], b[0])
@@ -131,6 +140,7 @@ func (a UInt128) MulFull(b UInt128) (UInt128, UInt128) {
     return chi, clo
 }
 
+// shift 128-bit unsigned integer left by b bits
 func (a UInt128) Shl(b uint) UInt128 {
     if b==0 { return a }
     if b>=64 {
@@ -139,6 +149,7 @@ func (a UInt128) Shl(b uint) UInt128 {
     return UInt128{ a[0]<<b, (a[1]<<b) | (a[0]>>(64-b)) }
 }
 
+// shift 128-bit unsigned integer right by b bits
 func (a UInt128) Shr(b uint) UInt128 {
     if b==0 { return a }
     if b>=64 {
@@ -147,6 +158,8 @@ func (a UInt128) Shr(b uint) UInt128 {
     return UInt128{ (a[0]>>b) | (a[1]<<(64-b)), a[1]>>b }
 }
 
+// divide 128-bit unsigned integer by 64-bit unsigned integer and
+// return quotient and 64-bit remainder
 func (a UInt128) Div64(b uint64) (UInt128, uint64) {
     var c UInt128
     if b==0 {
@@ -184,6 +197,8 @@ func (a UInt128) Div64(b uint64) (UInt128, uint64) {
     return c, rem
 }
 
+// divide 256-bit (lo, hi) unsigned integer by 128-bit unsigned integer and return
+// 128-bit quotient and remainder
 func UInt128DivFull(hi, lo, b UInt128) (UInt128, UInt128) {
     if b[1]==0 && hi[0]==0 && hi[1]==0 {
         c, rem := lo.Div64(b[0])
@@ -305,6 +320,7 @@ var uint128_10powers []UInt128 = []UInt128{
     UInt128{687399551400673280,   5421010862427522170},
 }
 
+// format 128-bit unsigned integer to string
 func (a UInt128) Format() string {
     if a[0]==0 && a[1]==0 { return "0" }
     var tmpa, tmp, x, x1 UInt128
@@ -362,6 +378,7 @@ func (a UInt128) Format() string {
     return string(chars[40-end:])
 }
 
+// parse unsigned integer from string and return value and error (nil if no error)
 func ParseUInt128(str string) (UInt128, error) {
     lastDigitValue := UInt128{ 11068046444225730969, 1844674407370955161 }
     slen := len(str)
@@ -393,10 +410,12 @@ func ParseUInt128(str string) (UInt128, error) {
     return out, nil
 }
 
+// convert 128-unsigned integer to 64-bit float point value
 func (a UInt128) ToFloat64() float64 {
     return float64(a[0]) + float64(a[1])*float64(18446744073709551616.0)
 }
 
+// convert 64-bit float point value to 128-bit unsigned integer
 func Float64ToUInt128(a float64) (UInt128, error) {
     if math.IsNaN(a) || a >= 340282366920938463463374607431768211456.0 || a < 0.0 {
         return UInt128{}, strconv.ErrRange
