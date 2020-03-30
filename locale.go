@@ -169,12 +169,12 @@ func (a UInt128) LocaleFormat(lang string) string {
 // parse unsigned integer from string and return value and error (nil if no error)
 func LocaleParseUInt128(lang, str string) (UInt128, error) {
     l := GetLocFmt(lang)
-    // check whether localized number
     if len(str)==0 { return UInt128{}, strconv.ErrSyntax }
     
     os := make([]rune, 0, len(str))
     for _, r := range str {
         if r>='0' && r<='9' {
+            // if standard digits
             os = append(os, r)
         } else if r!=l.Sep1000 {
             // if non-standard digit
