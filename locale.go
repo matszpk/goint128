@@ -22,7 +22,7 @@
 // Package to operate 128-bit integer
 package goint128
 
-//import "strconv"
+import "strconv"
 
 type locFmt struct {
     comma, sep1000 rune
@@ -165,12 +165,29 @@ func (a UInt128) LocaleFormat(lang string) string {
 }
 
 // parse unsigned integer from string and return value and error (nil if no error)
-/*func LocaleParseUInt128(lang, str string) (UInt128, error) {
+func LocaleParseUInt128(lang, str string) (UInt128, error) {
     l := getLocFmt(lang)
     // check whether localized number
     if len(str)==0 { return UInt128{}, strconv.ErrSyntax }
     
-    //if str[0]>='0' || str
-    
-    return UInt128{}, strconv.ErrSyntax
-}*/
+    os := make([]rune, 0, len(str))
+    for _, r := range str {
+        if r>='0' && r<='9' {
+            os = append(os, r)
+        } else if r!=l.sep1000 {
+            // if non-standard digit
+            dig:=0
+            found := false
+            for ; dig<=9; dig++ {
+                if l.digits[dig]==r {
+                    found = true
+                    break
+                }
+            }
+            if !found { return UInt128{}, strconv.ErrSyntax }
+            os = append(os, '0'+rune(dig))
+        }
+        // otherwise skip sep1000
+    }
+    return ParseUInt128(string(os))
+}

@@ -22,6 +22,7 @@
 package goint128
 
 import (
+    "strconv"
     "testing"
 )
 
@@ -31,14 +32,14 @@ type UInt128LocTC struct {
     expected string
 }
 
-func TestUInt128Locale(t *testing.T) {
+func TestUInt128LocaleFormat(t *testing.T) {
     testCases := []UInt128LocTC {
         UInt128LocTC{ "af", UInt128{1234567890,0}, "1 234 567 890" },
         UInt128LocTC{ "am", UInt128{1234567890,0}, "1,234,567,890" },
         UInt128LocTC{ "ar", UInt128{1234567890,0}, "١٬٢٣٤٬٥٦٧٬٨٩٠" },
         UInt128LocTC{ "az", UInt128{1234567890,0}, "1.234.567.890" },
         UInt128LocTC{ "bg", UInt128{1234567890,0}, "1 234 567 890" },
-        UInt128LocTC{ "bn", UInt128{1234567890,0}, "১,২৩,৪৫,৬৭,৮৯০", },
+        UInt128LocTC{ "bn", UInt128{1234567890,0}, "১,২৩,৪৫,৬৭,৮৯০" },
         UInt128LocTC{ "ca", UInt128{1234567890,0}, "1.234.567.890" },
         UInt128LocTC{ "cs", UInt128{1234567890,0}, "1 234 567 890" },
         UInt128LocTC{ "da", UInt128{1234567890,0}, "1.234.567.890" },
@@ -132,6 +133,33 @@ func TestUInt128Locale(t *testing.T) {
         }
         if tc.a!=a {
             t.Errorf("Argument has been modified: %d %s: %v!=%v", i, tc.lang, a, tc.a)
+        }
+    }
+}
+
+type UInt128LocParseTC struct {
+    lang string
+    str string
+    expected UInt128
+    expError error
+}
+
+func TestUInt128LocaleParse(t *testing.T) {
+    testCases := []UInt128LocParseTC {
+        UInt128LocParseTC{ "en", "", UInt128{}, strconv.ErrSyntax },
+        UInt128LocParseTC{ "en", "1,234,567,890", UInt128{1234567890,0}, nil },
+        UInt128LocParseTC{ "en", "1234,567,890", UInt128{1234567890,0}, nil },
+        UInt128LocParseTC{ "de", "1.234.567.890", UInt128{1234567890,0}, nil },
+        UInt128LocParseTC{ "pl", "1 234 567 890", UInt128{1234567890,0}, nil },
+        UInt128LocParseTC{ "bn", "১,২৩,৪৫,৬৭,৮৯০", UInt128{1234567890,0}, nil },
+        UInt128LocParseTC{ "bn", "1,234,567,890", UInt128{1234567890,0}, nil },
+        UInt128LocParseTC{ "bn", "১,২৩,৪৫x৬৭,৮৯০", UInt128{}, strconv.ErrSyntax },
+    }
+    for i, tc := range testCases {
+        result, err := LocaleParseUInt128(tc.lang, tc.str)
+        if tc.expected!=result || tc.expError!=err {
+            t.Errorf("Result mismatch: %d: parse(%v,%v)->%v,%v!=%v,%v",
+                     i, tc.lang, tc.str, tc.expected, tc.expError, result, err)
         }
     }
 }
