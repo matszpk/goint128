@@ -22,6 +22,8 @@
 // Package to operate 128-bit integer
 package goint128
 
+//import "strconv"
+
 type locFmt struct {
     comma, sep1000 rune
     sep100and1000 bool
@@ -114,7 +116,7 @@ var localeFormats map[string]locFmt = map[string]locFmt {
     "zu": locFmt{ '.', ',', false, normalDigits },
 }
 
-func (a UInt128) LocaleFormat(lang string) string {
+func getLocFmt(lang string) *locFmt {
     outLang := lang
     langSlen := len(lang)
     if langSlen>=3 && (lang[2]=='_' || lang[2]=='-') {
@@ -124,7 +126,12 @@ func (a UInt128) LocaleFormat(lang string) string {
     }
     l, ok := localeFormats[outLang]
     if !ok { l = defaultLocaleFormat }
-    
+    return &l
+}
+
+// format 128-bit unsigned integer including locale
+func (a UInt128) LocaleFormat(lang string) string {
+    l := getLocFmt(lang)
     s := a.Format()
     os := make([]rune, 0, len(s))
     slen := len(s)
@@ -135,7 +142,7 @@ func (a UInt128) LocaleFormat(lang string) string {
         if ti==0 { ti=3 }
     }
     for _, r := range s {
-        if r>='0' || r<='9' {
+        if r>='0' && r<='9' {
             os = append(os, l.digits[r-'0'])
         }
         if i!=1 {
@@ -156,3 +163,14 @@ func (a UInt128) LocaleFormat(lang string) string {
     }
     return string(os)
 }
+
+// parse unsigned integer from string and return value and error (nil if no error)
+/*func LocaleParseUInt128(lang, str string) (UInt128, error) {
+    l := getLocFmt(lang)
+    // check whether localized number
+    if len(str)==0 { return UInt128{}, strconv.ErrSyntax }
+    
+    //if str[0]>='0' || str
+    
+    return UInt128{}, strconv.ErrSyntax
+}*/
