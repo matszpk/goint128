@@ -125,7 +125,7 @@ func TestUInt128Locale(t *testing.T) {
     }
     for i, tc := range testCases {
         a := tc.a
-        result := tc.a.Locale(tc.lang)
+        result := tc.a.LocaleFormat(tc.lang)
         if tc.expected!=result {
             t.Errorf("Result mismatch: %d: fmt(%v,%s)->%v!=%v",
                      i, tc.a, tc.lang, tc.expected, result)

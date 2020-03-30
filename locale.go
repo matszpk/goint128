@@ -114,7 +114,7 @@ var localeFormats map[string]locFmt = map[string]locFmt {
     "zu": locFmt{ '.', ',', false, normalDigits },
 }
 
-func (a UInt128) Locale(lang string) string {
+func (a UInt128) LocaleFormat(lang string) string {
     outLang := lang
     langSlen := len(lang)
     if langSlen>=3 && (lang[2]=='_' || lang[2]=='-') {
