@@ -115,7 +115,14 @@ var localeFormats map[string]locFmt = map[string]locFmt {
 }
 
 func (a UInt128) Locale(lang string) string {
-    l, ok := localeFormats[lang]
+    outLang := lang
+    langSlen := len(lang)
+    if langSlen>=3 && (lang[2]=='_' || lang[2]=='-') {
+        outLang = lang[0:2]
+    } else if langSlen>=4 && (lang[3]=='_' || lang[3]=='-') {
+        outLang = lang[0:3]
+    }
+    l, ok := localeFormats[outLang]
     if !ok { l = defaultLocaleFormat }
     
     s := a.Format()

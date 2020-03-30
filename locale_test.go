@@ -117,6 +117,11 @@ func TestUInt128Locale(t *testing.T) {
         UInt128LocTC{ "ta", UInt128{890,0}, "890" },
         UInt128LocTC{ "ta", UInt128{89,0}, "89" },
         UInt128LocTC{ "ta", UInt128{9,0}, "9" },
+        UInt128LocTC{ "", UInt128{1234567890,0}, "1,234,567,890" },
+        UInt128LocTC{ "C", UInt128{1234567890,0}, "1,234,567,890" },
+        UInt128LocTC{ "pl-PL", UInt128{1234567890,0}, "1 234 567 890" },
+        UInt128LocTC{ "pl_PL", UInt128{1234567890,0}, "1 234 567 890" },
+        UInt128LocTC{ "pl_PL.UTF-8", UInt128{1234567890,0}, "1 234 567 890" },
     }
     for i, tc := range testCases {
         a := tc.a
