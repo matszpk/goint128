@@ -132,7 +132,7 @@ func GetLocFmt(lang string) *LocFmt {
 }
 
 // format 128-bit unsigned integer including locale
-func (a UInt128) LocaleFormat(lang string, sep1000 bool) string {
+func (a UInt128) LocaleFormat(lang string, noSep1000 bool) string {
     l := GetLocFmt(lang)
     s := a.Format()
     os := make([]rune, 0, len(s))
@@ -147,7 +147,7 @@ func (a UInt128) LocaleFormat(lang string, sep1000 bool) string {
         if r>='0' && r<='9' {
             os = append(os, l.Digits[r-'0'])
         }
-        if sep1000 && i!=1 {
+        if !noSep1000 && i!=1 {
             if !l.Sep100and1000 || ti<=3 {
                 ti--
                 if ti==0 {
