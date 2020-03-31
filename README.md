@@ -28,3 +28,5 @@ Available functions:
 * UInt128.ToFloat64 - convert to float64
 * Float64ToUInt128 - convert float64 to UInt128
 * marshallers and unmarshares for binary, text and JSON format
+* UInt128.LocaleFormat - format integer to decimal string including locale rules
+* LocaleParseUInt128 - parse integer from string including locale rules
