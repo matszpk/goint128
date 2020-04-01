@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// Package to operate on 128-bit integer
+// Package to operate on 128-bit integers
 package goint128
 
 import (
