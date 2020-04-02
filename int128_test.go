@@ -615,7 +615,7 @@ func TestUInt128Parse(t *testing.T) {
         }
         result, err = ParseUInt128Bytes([]byte(tc.str))
         if tc.expected!=result || tc.expError!=err {
-            t.Errorf("Result mismatch: %d: parse(%v)->%v,%v!=%v,%v",
+            t.Errorf("Result mismatch: %d: parseBytes(%v)->%v,%v!=%v,%v",
                      i, tc.str, tc.expected, tc.expError, result, err)
         }
     }

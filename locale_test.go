@@ -143,6 +143,14 @@ func TestUInt128LocaleFormat(t *testing.T) {
         if tc.a!=a {
             t.Errorf("Argument has been modified: %d %s: %v!=%v", i, tc.lang, a, tc.a)
         }
+        resultBytes := tc.a.LocaleFormatBytes(tc.lang, tc.noSep1000)
+        if tc.expected!=string(resultBytes) {
+            t.Errorf("Result mismatch: %d: fmtBytes(%v,%s)->%v!=%v",
+                     i, tc.a, tc.lang, tc.expected, result)
+        }
+        if tc.a!=a {
+            t.Errorf("Argument has been modified: %d %s: %v!=%v", i, tc.lang, a, tc.a)
+        }
     }
 }
 
@@ -169,6 +177,11 @@ func TestUInt128LocaleParse(t *testing.T) {
         result, err := LocaleParseUInt128(tc.lang, tc.str)
         if tc.expected!=result || tc.expError!=err {
             t.Errorf("Result mismatch: %d: parse(%v,%v)->%v,%v!=%v,%v",
+                     i, tc.lang, tc.str, tc.expected, tc.expError, result, err)
+        }
+        result, err = LocaleParseUInt128Bytes(tc.lang, []byte(tc.str))
+        if tc.expected!=result || tc.expError!=err {
+            t.Errorf("Result mismatch: %d: parseBytes(%v,%v)->%v,%v!=%v,%v",
                      i, tc.lang, tc.str, tc.expected, tc.expError, result, err)
         }
     }

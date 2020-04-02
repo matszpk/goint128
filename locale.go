@@ -22,7 +22,12 @@
 // Package to operate on 128-bit integers
 package goint128
 
-import "strconv"
+import (
+    "bytes"
+    "strings"
+    "strconv"
+    "unicode/utf8"
+)
 
 // locale formatting info
 type LocFmt struct {
@@ -132,11 +137,12 @@ func GetLocFmt(lang string) *LocFmt {
 }
 
 // format 128-bit unsigned integer including locale
-func (a UInt128) LocaleFormat(lang string, noSep1000 bool) string {
+func (a UInt128) LocaleFormatBytes(lang string, noSep1000 bool) []byte {
     l := GetLocFmt(lang)
-    s := a.Format()
-    os := make([]rune, 0, len(s))
+    s := a.FormatBytes()
+    var os bytes.Buffer
     slen := len(s)
+    os.Grow(slen*3)
     ti := slen
     i := slen
     if !l.Sep100and1000 {
@@ -145,25 +151,61 @@ func (a UInt128) LocaleFormat(lang string, noSep1000 bool) string {
     }
     for _, r := range s {
         if r>='0' && r<='9' {
-            os = append(os, l.Digits[r-'0'])
+            os.WriteRune(l.Digits[r-'0'])
         }
         if !noSep1000 && i!=1 {
             if !l.Sep100and1000 || ti<=3 {
                 ti--
                 if ti==0 {
-                    os = append(os, l.Sep1000)
+                    os.WriteRune(l.Sep1000)
                     ti = 3
                 }
             } else {
                 ti--
                 if (ti-3)&1==0 {
-                    os = append(os, l.Sep1000)
+                    os.WriteRune(l.Sep1000)
                 }
             }
         }
         i--
     }
-    return string(os)
+    return os.Bytes()
+}
+
+// format 128-bit unsigned integer including locale
+func (a UInt128) LocaleFormat(lang string, noSep1000 bool) string {
+    l := GetLocFmt(lang)
+    s := a.FormatBytes()
+    var os strings.Builder
+    slen := len(s)
+    os.Grow(slen*3)
+    ti := slen
+    i := slen
+    if !l.Sep100and1000 {
+        ti = (slen)%3
+        if ti==0 { ti=3 }
+    }
+    for _, r := range s {
+        if r>='0' && r<='9' {
+            os.WriteRune(l.Digits[r-'0'])
+        }
+        if !noSep1000 && i!=1 {
+            if !l.Sep100and1000 || ti<=3 {
+                ti--
+                if ti==0 {
+                    os.WriteRune(l.Sep1000)
+                    ti = 3
+                }
+            } else {
+                ti--
+                if (ti-3)&1==0 {
+                    os.WriteRune(l.Sep1000)
+                }
+            }
+        }
+        i--
+    }
+    return os.String()
 }
 
 // parse unsigned integer from string and return value and error (nil if no error)
@@ -171,11 +213,11 @@ func LocaleParseUInt128(lang, str string) (UInt128, error) {
     l := GetLocFmt(lang)
     if len(str)==0 { return UInt128{}, strconv.ErrSyntax }
     
-    os := make([]rune, 0, len(str))
+    os := make([]byte, 0, len(str))
     for _, r := range str {
         if r>='0' && r<='9' {
             // if standard digits
-            os = append(os, r)
+            os = append(os, byte(r))
         } else if r!=l.Sep1000 && r!=l.Sep1000_2 {
             // if non-standard digit
             dig:=0
@@ -187,9 +229,41 @@ func LocaleParseUInt128(lang, str string) (UInt128, error) {
                 }
             }
             if !found { return UInt128{}, strconv.ErrSyntax }
-            os = append(os, '0'+rune(dig))
+            os = append(os, '0'+byte(dig))
         }
         // otherwise skip sep1000
     }
-    return ParseUInt128(string(os))
+    return ParseUInt128Bytes(os)
 }
+
+// parse unsigned integer from string and return value and error (nil if no error)
+func LocaleParseUInt128Bytes(lang string, strInput []byte) (UInt128, error) {
+    l := GetLocFmt(lang)
+    if len(strInput)==0 { return UInt128{}, strconv.ErrSyntax }
+    
+    os := make([]byte, 0, len(strInput))
+    str := strInput
+    for len(str)>0 {
+        r, size := utf8.DecodeRune(str)
+        if r>='0' && r<='9' {
+            // if standard digits
+            os = append(os, byte(r))
+        } else if r!=l.Sep1000 && r!=l.Sep1000_2 {
+            // if non-standard digit
+            dig:=0
+            found := false
+            for ; dig<=9; dig++ {
+                if l.Digits[dig]==r {
+                    found = true
+                    break
+                }
+            }
+            if !found { return UInt128{}, strconv.ErrSyntax }
+            os = append(os, '0'+byte(dig))
+        }
+        // otherwise skip sep1000
+        str = str[size:]
+    }
+    return ParseUInt128Bytes(os)
+}
+
