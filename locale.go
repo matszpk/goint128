@@ -266,4 +266,3 @@ func LocaleParseUInt128Bytes(lang string, strInput []byte) (UInt128, error) {
     }
     return ParseUInt128Bytes(os)
 }
-
