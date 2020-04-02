@@ -320,9 +320,9 @@ var uint128_10powers []UInt128 = []UInt128{
     UInt128{687399551400673280,   5421010862427522170},
 }
 
-// format 128-bit unsigned integer to string
-func (a UInt128) Format() string {
-    if a[0]==0 && a[1]==0 { return "0" }
+// format 128-bit unsigned integer to bytes
+func (a UInt128) FormatBytes() []byte {
+    if a[0]==0 && a[1]==0 { return []byte{ '0' } }
     var tmpa, tmp, x, x1 UInt128
     var borrow uint64
     var chars [41]byte
@@ -375,11 +375,47 @@ func (a UInt128) Format() string {
         }
         chars[40-i] = digit
     }
-    return string(chars[40-end:])
+    return chars[40-end:]
+}
+
+// format 128-bit unsigned integer to string
+func (a UInt128) Format() string {
+    return string(a.FormatBytes())
 }
 
 // parse unsigned integer from string and return value and error (nil if no error)
 func ParseUInt128(str string) (UInt128, error) {
+    lastDigitValue := UInt128{ 11068046444225730969, 1844674407370955161 }
+    slen := len(str)
+    var out UInt128
+    var carry uint64
+    var i int
+    for i=0; i<slen && str[i]>='0' && str[i]<='9'; i++ {
+        if out[1]>lastDigitValue[1] ||
+            (out[1]==lastDigitValue[1] && out[0] > lastDigitValue[0]) {
+            return UInt128{}, strconv.ErrRange
+        }
+        digit := byte(str[i])-'0'
+        temp := out
+        // multiply by 10
+        out[1] = (temp[1]<<3) | (temp[0]>>61)
+        out[0] = temp[0]<<3
+        out[0], carry = Add64(out[0], temp[0]<<1, 0)
+        out[1], _ = Add64(out[1], (temp[1]<<1) | (temp[0]>>63), carry)
+        // add digit
+        out[0], carry = Add64(out[0], uint64(digit), 0)
+        out[1], carry = Add64(out[1], 0, carry)
+        if carry!=0 {
+            return UInt128{}, strconv.ErrRange
+        }
+    }
+    if i==0 || i!=slen {
+        return UInt128{}, strconv.ErrSyntax
+    }
+    return out, nil
+}
+
+func ParseUInt128Bytes(str []byte) (UInt128, error) {
     lastDigitValue := UInt128{ 11068046444225730969, 1844674407370955161 }
     slen := len(str)
     var out UInt128
