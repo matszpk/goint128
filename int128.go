@@ -485,12 +485,12 @@ func (a *UInt128) UnmarshalBinary(data []byte) error {
 }
 
 func (a UInt128) MarshalText() (text []byte, err error) {
-    return []byte(a.Format()), nil
+    return a.FormatBytes(), nil
 }
 
 func (a *UInt128) UnmarshalText(text []byte) error {
     var err error
-    *a, err = ParseUInt128(string(text))
+    *a, err = ParseUInt128Bytes(text)
     return err
 }
 
