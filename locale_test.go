@@ -2,7 +2,7 @@
  * locale_test.go - tests for int128 routines
  *
  * goint128 - go int128 library
- * Copyright (C) 2019  Mateusz Szpakowski
+ * Copyright (C) 2020  Mateusz Szpakowski
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
