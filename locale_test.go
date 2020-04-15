@@ -186,3 +186,17 @@ func TestUInt128LocaleParse(t *testing.T) {
         }
     }
 }
+
+func BenchmarkUInt128LocaleFormat(b *testing.B) {
+    a := UInt128{ 7341542494928938945, 938491 }
+    for i := 0; i < b.N; i++ {
+        a.LocaleFormat("pl", false)
+    }
+}
+
+func BenchmarkUInt128LocaleFormatBytes(b *testing.B) {
+    a := UInt128{ 7341542494928938945, 938491 }
+    for i := 0; i < b.N; i++ {
+        a.LocaleFormatBytes("pl", false)
+    }
+}
