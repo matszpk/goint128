@@ -23,7 +23,6 @@
 package goint128
 
 import (
-    //"bytes"
     "strings"
     "strconv"
     "unicode/utf8"
@@ -140,11 +139,9 @@ func GetLocFmt(lang string) *LocFmt {
 func (a UInt128) LocaleFormatBytes(lang string, noSep1000 bool) []byte {
     l := GetLocFmt(lang)
     s := a.FormatBytes()
-    //var os bytes.Buffer
     slen := len(s)
     os := make([]byte, slen<<1) // optimization
     oslen := 0
-    //os.Grow(slen)
     ti := slen
     i := slen
     if !l.Sep100and1000 {
@@ -153,7 +150,6 @@ func (a UInt128) LocaleFormatBytes(lang string, noSep1000 bool) []byte {
     }
     for _, r := range s {
         if r>='0' && r<='9' {
-            //os.WriteRune(l.Digits[r-'0'])
             if oslen+4 >= len(os) {
                 os = append(os, 0,0,0,0)
             }
@@ -167,7 +163,6 @@ func (a UInt128) LocaleFormatBytes(lang string, noSep1000 bool) []byte {
                         os = append(os, 0,0,0,0)
                     }
                     oslen += utf8.EncodeRune(os[oslen:], l.Sep1000)
-                    //os.WriteRune(l.Sep1000)
                     ti = 3
                 }
             } else {
@@ -177,7 +172,6 @@ func (a UInt128) LocaleFormatBytes(lang string, noSep1000 bool) []byte {
                         os = append(os, 0,0,0,0)
                     }
                     oslen += utf8.EncodeRune(os[oslen:], l.Sep1000)
-                    //os.WriteRune(l.Sep1000)
                 }
             }
         }
