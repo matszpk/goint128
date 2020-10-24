@@ -323,7 +323,6 @@ var uint128_10powers []UInt128 = []UInt128{
 // format 128-bit unsigned integer to bytes
 func (a UInt128) FormatBytes() []byte {
     if a[0]==0 && a[1]==0 { return []byte{ '0' } }
-    var tmpa, tmp, x, x1 UInt128
     var borrow uint64
     var chars [41]byte
     i := sort.Search(len(uint128_10powers), func(ii int) bool {
@@ -332,48 +331,90 @@ func (a UInt128) FormatBytes() []byte {
         return borrow!=0 // a<uint128_10powers[ii]
     })-1
     end := i
-    tmp = a
-    for ; i>=0; i-- {
-        // calculate digit
-        x = uint128_10powers[i]
-        var digit byte = '0'
-        if i<38 {
-            x1[1] = (x[1]<<3) | (x[0]>>61)
-            x1[0] = x[0]<<3
-            // check if 3 bit of digit - 8
+    if i<19 {
+        var tmpa, tmp, x, x1 uint64
+        tmp = a[0]
+        for ; i>=0; i-- {
+            // calculate digit
+            x = uint128_10powers[i][0]
+            var digit byte = '0'
+            {
+                x1 = x<<3
+                // check if 3 bit of digit - 8
+                tmpa, borrow = Sub64(tmp, x1, 0)
+                if borrow==0 {
+                    digit += 8
+                    tmp = tmpa
+                }
+                x1 = x<<2
+                // check if 2 bit of digit - 4
+                tmpa, borrow = Sub64(tmp, x1, 0)
+                if borrow==0 {
+                    digit += 4
+                    tmp = tmpa
+                }
+            }
+            // check if 1 bit of digit - 2
+            x1 = x<<1
+            tmpa, borrow = Sub64(tmp, x1, 0)
+            if borrow==0 {
+                digit += 2
+                tmp = tmpa
+            }
+            // check if 0 bit of digit - 1
+            tmpa, borrow = Sub64(tmp, x, 0)
+            if borrow==0 {
+                digit++
+                tmp = tmpa
+            }
+            chars[40-i] = digit
+        }
+    } else {
+        var tmpa, tmp, x, x1 UInt128
+        var borrow uint64
+        tmp = a
+        for ; i>=0; i-- {
+            // calculate digit
+            x = uint128_10powers[i]
+            var digit byte = '0'
+            if i<38 {
+                x1[1] = (x[1]<<3) | (x[0]>>61)
+                x1[0] = x[0]<<3
+                // check if 3 bit of digit - 8
+                tmpa[0], borrow = Sub64(tmp[0], x1[0], 0)
+                tmpa[1], borrow = Sub64(tmp[1], x1[1], borrow)
+                if borrow==0 {
+                    digit += 8
+                    tmp = tmpa
+                }
+                x1[1] = (x[1]<<2) | (x[0]>>62)
+                x1[0] = x[0]<<2
+                // check if 2 bit of digit - 4
+                tmpa[0], borrow = Sub64(tmp[0], x1[0], 0)
+                tmpa[1], borrow = Sub64(tmp[1], x1[1], borrow)
+                if borrow==0 {
+                    digit += 4
+                    tmp = tmpa
+                }
+            }
+            // check if 1 bit of digit - 2
+            x1[1] = (x[1]<<1) | (x[0]>>63)
+            x1[0] = x[0]<<1
             tmpa[0], borrow = Sub64(tmp[0], x1[0], 0)
             tmpa[1], borrow = Sub64(tmp[1], x1[1], borrow)
             if borrow==0 {
-                digit += 8
+                digit += 2
                 tmp = tmpa
             }
-            x1[1] = (x[1]<<2) | (x[0]>>62)
-            x1[0] = x[0]<<2
-            // check if 2 bit of digit - 4
-            tmpa[0], borrow = Sub64(tmp[0], x1[0], 0)
-            tmpa[1], borrow = Sub64(tmp[1], x1[1], borrow)
+            // check if 0 bit of digit - 1
+            tmpa[0], borrow = Sub64(tmp[0], x[0], 0)
+            tmpa[1], borrow = Sub64(tmp[1], x[1], borrow)
             if borrow==0 {
-                digit += 4
+                digit++
                 tmp = tmpa
             }
+            chars[40-i] = digit
         }
-        // check if 1 bit of digit - 2
-        x1[1] = (x[1]<<1) | (x[0]>>63)
-        x1[0] = x[0]<<1
-        tmpa[0], borrow = Sub64(tmp[0], x1[0], 0)
-        tmpa[1], borrow = Sub64(tmp[1], x1[1], borrow)
-        if borrow==0 {
-            digit += 2
-            tmp = tmpa
-        }
-        // check if 0 bit of digit - 1
-        tmpa[0], borrow = Sub64(tmp[0], x[0], 0)
-        tmpa[1], borrow = Sub64(tmp[1], x[1], borrow)
-        if borrow==0 {
-            digit++
-            tmp = tmpa
-        }
-        chars[40-i] = digit
     }
     return chars[40-end:]
 }
@@ -390,7 +431,15 @@ func ParseUInt128(str string) (UInt128, error) {
     var out UInt128
     var carry uint64
     var i int
-    for i=0; i<slen && str[i]>='0' && str[i]<='9'; i++ {
+    for i=0; i<19 && i<slen && str[i]>='0' && str[i]<='9'; i++ {
+        digit := byte(str[i])-'0'
+        // multiply by 10
+        out[0] *= 10
+        // add digit
+        out[0] += uint64(digit)
+    }
+    
+    for ; i<slen && str[i]>='0' && str[i]<='9'; i++ {
         if out[1]>lastDigitValue[1] ||
             (out[1]==lastDigitValue[1] && out[0] > lastDigitValue[0]) {
             return UInt128{}, strconv.ErrRange
@@ -421,7 +470,15 @@ func ParseUInt128Bytes(str []byte) (UInt128, error) {
     var out UInt128
     var carry uint64
     var i int
-    for i=0; i<slen && str[i]>='0' && str[i]<='9'; i++ {
+    for i=0; i<19 && i<slen && str[i]>='0' && str[i]<='9'; i++ {
+        digit := byte(str[i])-'0'
+        // multiply by 10
+        out[0] *= 10
+        // add digit
+        out[0] += uint64(digit)
+    }
+    
+    for ; i<slen && str[i]>='0' && str[i]<='9'; i++ {
         if out[1]>lastDigitValue[1] ||
             (out[1]==lastDigitValue[1] && out[0] > lastDigitValue[0]) {
             return UInt128{}, strconv.ErrRange

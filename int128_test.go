@@ -518,6 +518,8 @@ func TestUInt128Format(t *testing.T) {
     testCases := []UInt128FmtTC {
         UInt128FmtTC { UInt128{ 0x5f75348b0131b3af, 0xb3af0f },
             "217224419425143693331510191" },
+        UInt128FmtTC { UInt128{ 13567675643343434342, 0 },
+            "13567675643343434342" },
         UInt128FmtTC { UInt128{ 834899285198348317, 0 }, "834899285198348317" },
         UInt128FmtTC { UInt128{ 0xffffffffffffffff, 0xffffffffffffffff },
             "340282366920938463463374607431768211455" },
@@ -564,6 +566,20 @@ func TestUInt128Format(t *testing.T) {
     }
 }
 
+func BenchmarkUInt128Format64(b *testing.B) {
+    a := UInt128{ 834899285198348317, 0 }
+    for i := 0; i < b.N; i++ {
+        a.Format()
+    }
+}
+
+func BenchmarkUInt128Format128(b *testing.B) {
+    a := UInt128{ 0x1c9e66c000000000, 0xe1b1e5f90f944d6e }
+    for i := 0; i < b.N; i++ {
+        a.Format()
+    }
+}
+
 type UInt128ParseTC struct {
     str string
     expected UInt128
@@ -572,6 +588,8 @@ type UInt128ParseTC struct {
 
 func TestUInt128Parse(t *testing.T) {
     testCases := []UInt128ParseTC {
+        UInt128ParseTC { "10579020929494000007",
+            UInt128{ 10579020929494000007, 0 }, nil },
         UInt128ParseTC { "217224419425143693331510191",
             UInt128{ 0x5f75348b0131b3af, 0xb3af0f }, nil },
         UInt128ParseTC { "834899285198348317", UInt128{ 834899285198348317, 0 }, nil },
@@ -618,6 +636,34 @@ func TestUInt128Parse(t *testing.T) {
             t.Errorf("Result mismatch: %d: parseBytes(%v)->%v,%v!=%v,%v",
                      i, tc.str, tc.expected, tc.expError, result, err)
         }
+    }
+}
+
+func BenchmarkUInt128Parse64(b *testing.B) {
+    s := "834899285198348317"
+    for i := 0; i < b.N; i++ {
+        ParseUInt128(s)
+    }
+}
+
+func BenchmarkUInt128Parse64Bytes(b *testing.B) {
+    s := []byte("834899285198348317")
+    for i := 0; i < b.N; i++ {
+        ParseUInt128Bytes(s)
+    }
+}
+
+func BenchmarkUInt128Parse128(b *testing.B) {
+    s := "303386871892539280136352169180487469"
+    for i := 0; i < b.N; i++ {
+        ParseUInt128(s)
+    }
+}
+
+func BenchmarkUInt128Parse128Bytes(b *testing.B) {
+    s := []byte("303386871892539280136352169180487469")
+    for i := 0; i < b.N; i++ {
+        ParseUInt128Bytes(s)
     }
 }
 
