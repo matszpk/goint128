@@ -373,7 +373,7 @@ func (a UInt128) FormatBytes() []byte {
         var tmpa, tmp, x, x1 UInt128
         var borrow uint64
         tmp = a
-        for ; i>=0; i-- {
+        for ; i>=19; i-- {
             // calculate digit
             x = uint128_10powers[i]
             var digit byte = '0'
@@ -412,6 +412,41 @@ func (a UInt128) FormatBytes() []byte {
             if borrow==0 {
                 digit++
                 tmp = tmpa
+            }
+            chars[40-i] = digit
+        }
+        for ; i>=0; i-- {
+            // calculate digit
+            x[0] = uint128_10powers[i][0]
+            var digit byte = '0'
+            {
+                x1[0] = x[0]<<3
+                // check if 3 bit of digit - 8
+                tmpa[0], borrow = Sub64(tmp[0], x1[0], 0)
+                if borrow==0 {
+                    digit += 8
+                    tmp[0] = tmpa[0]
+                }
+                x1[0] = x[0]<<2
+                // check if 2 bit of digit - 4
+                tmpa[0], borrow = Sub64(tmp[0], x1[0], 0)
+                if borrow==0 {
+                    digit += 4
+                    tmp[0] = tmpa[0]
+                }
+            }
+            // check if 1 bit of digit - 2
+            x1[0] = x[0]<<1
+            tmpa[0], borrow = Sub64(tmp[0], x1[0], 0)
+            if borrow==0 {
+                digit += 2
+                tmp[0] = tmpa[0]
+            }
+            // check if 0 bit of digit - 1
+            tmpa[0], borrow = Sub64(tmp[0], x[0], 0)
+            if borrow==0 {
+                digit++
+                tmp[0] = tmpa[0]
             }
             chars[40-i] = digit
         }

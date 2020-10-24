@@ -518,6 +518,8 @@ func TestUInt128Format(t *testing.T) {
     testCases := []UInt128FmtTC {
         UInt128FmtTC { UInt128{ 0x5f75348b0131b3af, 0xb3af0f },
             "217224419425143693331510191" },
+        UInt128FmtTC { UInt128{ 0x91bf53b0e56d8fd3, 1 },
+            "28948948948989349843" },
         UInt128FmtTC { UInt128{ 13567675643343434342, 0 },
             "13567675643343434342" },
         UInt128FmtTC { UInt128{ 834899285198348317, 0 }, "834899285198348317" },
