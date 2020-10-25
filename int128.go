@@ -558,6 +558,12 @@ func Float64ToUInt128(a float64) (UInt128, error) {
     return UInt128{ ami<<uint(ae), ami>>uint(64-ae) }, nil
 }
 
+// stringer
+
+func (a UInt128) String() string {
+    return string(a.FormatBytes())
+}
+
 // marshalling/unmarshaling
 
 func (a UInt128) MarshalBinary() (data []byte, err error) {
