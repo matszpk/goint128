@@ -106,6 +106,11 @@ func (a UInt128) Cmp(b UInt128) int {
     }
 }
 
+// return true if zero
+func (a UInt128) IsZero() bool {
+    return a[0]==0 && a[1]==0
+}
+
 // multiply 128-bit unsinged integers and return lower 128 bits value
 func (a UInt128) Mul(b UInt128) UInt128 {
     var c UInt128
